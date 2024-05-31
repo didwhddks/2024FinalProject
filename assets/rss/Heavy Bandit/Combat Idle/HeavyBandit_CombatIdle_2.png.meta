@@ -1,0 +1,38 @@
+{
+  "ver": "2.3.7",
+  "uuid": "ac333247-edcc-4278-a6e1-d8e42fc6017a",
+  "importer": "texture",
+  "type": "sprite",
+  "wrapMode": "clamp",
+  "filterMode": "bilinear",
+  "premultiplyAlpha": false,
+  "genMipmaps": false,
+  "packable": true,
+  "width": 48,
+  "height": 48,
+  "platformSettings": {},
+  "subMetas": {
+    "HeavyBandit_CombatIdle_2": {
+      "ver": "1.0.6",
+      "uuid": "ba0cadd8-45f5-4000-ace4-55ca84a90c24",
+      "importer": "sprite-frame",
+      "rawTextureUuid": "ac333247-edcc-4278-a6e1-d8e42fc6017a",
+      "trimType": "auto",
+      "trimThreshold": 1,
+      "rotated": false,
+      "offsetX": -1.5,
+      "offsetY": -4.5,
+      "trimX": 6,
+      "trimY": 11,
+      "width": 33,
+      "height": 35,
+      "rawWidth": 48,
+      "rawHeight": 48,
+      "borderTop": 0,
+      "borderBottom": 0,
+      "borderLeft": 0,
+      "borderRight": 0,
+      "subMetas": {}
+    }
+  }
+}

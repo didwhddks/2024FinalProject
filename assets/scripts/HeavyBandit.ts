@@ -1,0 +1,106 @@
+import GameManager from "./GameManager"
+import Info from "./Info";
+const {ccclass, property} = cc._decorator;
+
+enum State {
+    Move,
+    CombatIdle,
+    Attack,
+    Death
+}
+
+@ccclass
+export default class HeavyBandit extends cc.Component {
+
+    @property(GameManager)
+    gameManager: GameManager = null;
+
+
+    speedX: number = -100;
+    state: State = State.Move;
+
+    attackRange: number = 50;
+    damage: number = 25;
+    attackGap: number = 3;
+
+    attackReady: boolean = true;
+    attackProperty:string = 'single';
+
+
+    start () {
+        this.getComponent(cc.Animation).play('move');
+        this.gameManager = cc.find('GameManager').getComponent(GameManager);
+    }
+
+    update (dt: number) {
+        if(this.node.getComponent(Info).dead) return;
+
+        if(this.state === State.Move) {
+            let res = cc.director.getPhysicsManager().rayCast(cc.v2(this.node.x, this.node.y), cc.v2(this.node.x-this.attackRange, this.node.y), cc.RayCastType.All);
+            for(let i of res) {
+                if(i.collider.tag === 50){
+                    this.changeState(State.Attack);
+                    break;
+                }
+            }
+        }
+        if(this.state === State.CombatIdle) {
+            let res = cc.director.getPhysicsManager().rayCast(cc.v2(this.node.x, this.node.y), cc.v2(this.node.x-this.attackRange, this.node.y), cc.RayCastType.All);
+            let flag:number = 1;
+            for(let i of res) {
+                if(i.collider.tag === 50){
+                    flag = 0;
+                    break;
+                }
+            }
+            if(flag) this.changeState(State.Move);
+        }
+
+        if(this.state === State.Move) this.node.x += this.speedX * dt;
+    
+        if(this.state === State.CombatIdle && this.attackReady) this.changeState(State.Attack);
+    }
+
+    changeState(state: State) {
+        this.state = state;
+        this.getComponent(cc.Animation).stop();
+        if(state === State.Move) this.getComponent(cc.Animation).play('move');
+        if(state === State.CombatIdle) this.getComponent(cc.Animation).play('combatIdle');
+        if(state === State.Attack) {
+            if(this.attackReady){
+                this.getComponent(cc.Animation).play('attack');
+                this.attackReady = false;
+            }
+            else{
+                this.changeState(State.CombatIdle);
+            }
+        }
+    }
+
+    combatdle() { // Animation Event
+        this.changeState(State.CombatIdle);
+        this.scheduleOnce(() => {
+            this.attackReady = true;
+        }, this.attackGap);
+    }
+
+    attack() { // Animation Event
+        let res = cc.director.getPhysicsManager().rayCast(cc.v2(this.node.x, this.node.y), cc.v2(this.node.x-this.attackRange, this.node.y), cc.RayCastType.All);
+        if(this.attackProperty === 'single'){ // 單體攻擊
+            let target: cc. Node = null;
+            for(let enemy of res){
+                if(!enemy.collider.isValid || enemy.collider.tag === 0) continue;
+                if(!target || target.x > enemy.collider.node.x) target = enemy.collider.node;
+            }
+            if(target) {
+                target.getComponent(Info).getDamage += this.damage;
+            }
+        }
+        else{ // 範圍攻擊
+            for(let enemy of res) {
+                if(!enemy.collider.isValid || enemy.collider.tag === 0) continue;
+                enemy.collider.getComponent(Info).getDamage += this.damage;
+            }
+        }
+    }
+}

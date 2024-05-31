@@ -1,0 +1,43 @@
+{
+  "__type__": "cc.AnimationClip",
+  "_name": "combatIdle",
+  "_objFlags": 0,
+  "_native": "",
+  "_duration": 0.5833333333333334,
+  "sample": 12,
+  "speed": 1,
+  "wrapMode": 2,
+  "curveData": {
+    "comps": {
+      "cc.Sprite": {
+        "spriteFrame": [
+          {
+            "frame": 0,
+            "value": {
+              "__uuid__": "6cab20ce-a1f6-4337-bab4-a5f7d12329e0"
+            }
+          },
+          {
+            "frame": 0.16666666666666666,
+            "value": {
+              "__uuid__": "709af4ed-1510-4ef7-a756-b311a7fbd8c7"
+            }
+          },
+          {
+            "frame": 0.3333333333333333,
+            "value": {
+              "__uuid__": "ba0cadd8-45f5-4000-ace4-55ca84a90c24"
+            }
+          },
+          {
+            "frame": 0.5,
+            "value": {
+              "__uuid__": "574c5502-efc2-46d7-870c-10e09233e236"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "events": []
+}
