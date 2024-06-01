@@ -51,10 +51,16 @@ export default class LoginSignUp extends cc.Component {
         let password = cc.find("SignUpPage/PasswordInput").getComponent(cc.EditBox).string;
         let password_confirm = cc.find("SignUpPage/PasswordConfirm").getComponent(cc.EditBox).string;
 
+        if(userName.length === 0){
+            alert('User name cannot be empty!')
+            return;
+        }
+        
         if(password !== password_confirm){
             alert('Password confirmation is wrong!')
             return;
         }
+        
 
         try {
             // Sign up
@@ -79,7 +85,7 @@ export default class LoginSignUp extends cc.Component {
             //     life: 5
             // });
 
-            // cc.director.loadScene('Menu');
+            cc.director.loadScene('Menu');
                
           } catch (err) {
             alert("ERROR: " + err);
@@ -94,7 +100,7 @@ export default class LoginSignUp extends cc.Component {
             const auth = firebase.auth();
             await auth.signInWithEmailAndPassword(email, password);
             
-            // cc.director.loadScene('Menu');
+            cc.director.loadScene('Menu');
           } catch (error) {
             alert("ERROR: " + error)
           }
