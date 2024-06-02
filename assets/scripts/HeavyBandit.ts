@@ -24,7 +24,7 @@ export default class HeavyBandit extends cc.Component {
     attackGap: number = 3;
 
     attackReady: boolean = true;
-    attackProperty:string = 'single';
+    attackProperty:string = 'multiple';
 
 
     start () {
