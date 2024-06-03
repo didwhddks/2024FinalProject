@@ -37,6 +37,11 @@ export default class Kunoichi extends cc.Component {
     update (dt: number) {
         if(this.node.getComponent(Info).dead) return;
 
+        if(this.node.x < -100){ // 超出界線的自殺, 實際應該不會發生, 因為有基地會擋住
+            this.getComponent(Info).die();
+            return;
+        }
+
         if(this.state === State.Move) {
             let res = cc.director.getPhysicsManager().rayCast(cc.v2(this.node.x, this.node.y), cc.v2(this.node.x-this.attackRange, this.node.y), cc.RayCastType.All);
             for(let i of res) {
