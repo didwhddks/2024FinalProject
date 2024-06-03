@@ -13,19 +13,31 @@ export default class Info extends cc.Component {
     @property(GameManager)
     gameManager: GameManager = null;
 
-    life: number = 100
+    life: number = 100;
     dead: boolean = false;
 
     getDamage: number= 0;
+    default_life =100;
 
     index: number = 0;
+
+    onload()
+    {
+        // if(this.is_base()) this.default_life=this.life=10000; 
+    }
 
     start () {
         this.gameManager = cc.find('GameManager').getComponent(GameManager);
     }
 
+    is_base()
+    {
+        return this.node.name=="base"||this.node.name=="enemy_base";
+    }
+
     die() {
         this.dead = true;
+        // if(this.is_base()) return;
         this.getComponent(cc.Animation).stop();
         this.getComponent(cc.PhysicsBoxCollider).enabled = false;
         this.getComponent(cc.RigidBody).gravityScale = 0;
@@ -45,7 +57,11 @@ export default class Info extends cc.Component {
 
         this.life -= this.getDamage;
         this.getDamage = 0;
-        this.node.children[0].getComponent(cc.Label).string = this.life.toString();
+        if(!this.is_base()) this.node.children[0].getComponent(cc.Label).string = this.life.toString();
+        else
+        {
+            this.node.children[0].getComponent(cc.Sprite).fillRange=this.life/this.default_life;
+        }
         if(this.life <= 0){
             this.dead = true;
             if(!this.gameManager.invincible){

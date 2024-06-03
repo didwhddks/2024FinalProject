@@ -21,10 +21,17 @@ export default class GameManager extends cc.Component {
     @property(cc.Button)
     KunoichiBtn: cc.Button = null;
 
+    @property(cc.Node)
+    enemy_base:cc.Node=null;
+
+    @property(cc.Node)
+    base:cc.Node=null;
+
     user = null;
     roomId = null;
     rivalId = null;
     rivalName = null;
+
 
     gameStart: boolean = false;
     alliance_arr: cc.Node[] = [];
@@ -36,7 +43,10 @@ export default class GameManager extends cc.Component {
     onLoad () {
         this.user = firebase.auth().currentUser;
         cc.director.getPhysicsManager().enabled = true;
-
+        this.base.getComponent(Info).index=100000;
+        this.enemy_base.getComponent(Info).index=-100000;
+        this.alliance_arr.push(this.base);
+        this.enemy_arr.push(this.enemy_base);
         // 看碰撞體
         // cc.director.getPhysicsManager().debugDrawFlags = cc.PhysicsManager.DrawBits.e_aabbBit |
         //     // cc.PhysicsManager.DrawBits.e_pairBit |
@@ -136,6 +146,7 @@ export default class GameManager extends cc.Component {
         })
 
         if(!this.gameStart){
+            console.debug("listen1:",this.base,this.enemy_base);
             this.gameStart = true;
             cc.find('ColorBlack').active = false;
             cc.find('btn1').active = true;
@@ -160,8 +171,10 @@ export default class GameManager extends cc.Component {
                     console.debug("GG: ", index)
                     if(index > 0) {
                         for(let i of this.enemy_arr) {
+                            console.debug(i.getComponent(Info).index);
                             if(i.getComponent(Info).index === index){
                                 this.scheduleOnce(() => {
+                                    
                                     i.getComponent(Info).die();
                                 }, ((time+300)-Date.now())/1000)
                             }
@@ -239,6 +252,9 @@ export default class GameManager extends cc.Component {
             console.log('change: ', message)
             if(message === 'enter'){
                this.gameStart = true;
+               console.debug("listen2:",this.base,this.enemy_base);
+               this.alliance_arr[0].getComponent(Info).index=-100000;
+               this.enemy_arr[0].getComponent(Info).index=100000;        
                cc.find('ColorBlack').active = false;
                cc.find('btn1').active = true;
                cc.find('btn4').active = true;
@@ -276,6 +292,9 @@ export default class GameManager extends cc.Component {
 
                     await firebase.database().ref('Rooms/' + this.roomId).set(updates);
                     this.listen2();
+                    // const tmp=this.alliance_arr[0];
+                    // this.alliance_arr[0]=this.enemy_arr[0];
+                    // this.enemy_arr[0]=tmp;
                     await firebase.database().ref('WaitingPlayer/' + this.rivalId).remove(); // 從等待列表移除
 
                 }
@@ -341,9 +360,39 @@ export default class GameManager extends cc.Component {
                 for(let i of this.enemy_arr) {
                     i.getComponent(Info).injure();
                 }
+                
             }
             this.alliance_arr = this.alliance_arr.filter(alliance => alliance.getComponent(Info).dead !== true); // 清理array
             this.enemy_arr = this.enemy_arr.filter(enemy => enemy.getComponent(Info).dead !== true);    
+            this.check();
+        }
+    }
+
+    check()
+    {
+        if(this.alliance_arr[0]!==this.base&&this.enemy_arr[0]!==this.enemy_base) //平手
+        {
+            
+        }
+        else if(!this.invincible&&this.enemy_arr[0]!==this.enemy_base)
+        {
+            console.debug("1",this.enemy_arr[0]===this.enemy_base,this.alliance_arr[0]===this.base);
+            cc.director.loadScene("win");
+        }
+        else if(!this.invincible&&this.enemy_arr[0]===this.enemy_base&&this.alliance_arr[0]!==this.base)
+        {
+            console.debug("2",this.enemy_arr[0]===this.enemy_base,this.alliance_arr[0]===this.base);
+            cc.director.loadScene("Lose");
+        }
+        else if(this.invincible&&this.alliance_arr[0]!==this.base)
+        {
+            console.debug("3",this.enemy_arr[0]===this.enemy_base,this.alliance_arr[0]===this.base);
+            cc.director.loadScene("Lose");
+        }
+        else if(this.invincible&&this.alliance_arr[0]===this.base&&this.enemy_arr[0]!==this.enemy_base)
+        {
+            console.debug("4",this.enemy_arr[0]===this.enemy_base,this.alliance_arr[0]===this.base);
+            cc.director.loadScene("win");
         }
     }
 
@@ -407,7 +456,7 @@ export default class GameManager extends cc.Component {
     HeavyBandit(index: number) {
         let tmp = cc.instantiate(this.heavyBandit);
         tmp.setParent(cc.director.getScene());
-        tmp.x = 900;
+        tmp.x = this.base.x-(this.base.width>>1)-40;
         tmp.y = 145;
         tmp.getComponent(Info).index= index;
         // if(this.invincible) tmp.getComponent(Info).life = 99999;
@@ -418,7 +467,7 @@ export default class GameManager extends cc.Component {
     HeavyBanditEnemy(index: number) {
         let tmp = cc.instantiate(this.heavyBanditEnemy);
         tmp.setParent(cc.director.getScene());
-        tmp.x = 40;
+        tmp.x = this.enemy_base.x+(this.enemy_base.width>>1)+40;
         tmp.y = 145;
         tmp.getComponent(Info).index= index;
         // if(this.invincible) tmp.getComponent(Info).life = 99999;
