@@ -47,33 +47,33 @@ export default class GameManager extends cc.Component {
     }
     listen1() {
         this.index = 1;
-        console.debug("RoomID: ", this.roomId, ' rivalID: ', this.rivalId, 'rivalName: ', this.rivalName)
-        firebase.database().ref('Rooms/' + this.roomId + '/' + this.rivalId).on('child_added', snapshot => {
-            if(!this.gameStart) return;
-            let message = snapshot.val();
-            let type = Object.keys(message)[1];
-            let id = Object.values(message)[1];
-            let time: number = Object.values(message)[3] as number;
-            let index: number = Object.values(message)[0] as number;
-            let mode: string = Object.values(message)[2] as string;
-            // console.log('Enemy: ', type, ' time: ', time, ' index: ', index, ' mode: ', mode);
-            if(type === 'minion'){
-                if(mode === 'die') return;
-                else if(id === 1){
-                    this.scheduleOnce(() => {
-                        this.HeavyBanditEnemy(index);
-                    }, ((time+500)-Date.now())/1000);
-                }
-                else if(id === 2){
-                    this.scheduleOnce(() => {
-                        this.KunoichiEnemy(index);
-                    }, ((time+500)-Date.now())/1000);
-                } 
+        // console.debug("RoomID: ", this.roomId, ' rivalID: ', this.rivalId, 'rivalName: ', this.rivalName)
+        // firebase.database().ref('Rooms/' + this.roomId + '/' + this.rivalId).on('child_added', snapshot => {
+        //     if(!this.gameStart) return;
+        //     let message = snapshot.val();
+        //     let type = Object.keys(message)[1];
+        //     let id = Object.values(message)[1];
+        //     let time: number = Object.values(message)[3] as number;
+        //     let index: number = Object.values(message)[0] as number;
+        //     let mode: string = Object.values(message)[2] as string;
+        //     // console.log('Enemy: ', type, ' time: ', time, ' index: ', index, ' mode: ', mode);
+        //     if(type === 'minion'){
+        //         if(mode === 'die') return;
+        //         else if(id === 1){
+        //             this.scheduleOnce(() => {
+        //                 this.HeavyBanditEnemy(index);
+        //             }, ((time+500)-Date.now())/1000);
+        //         }
+        //         else if(id === 2){
+        //             this.scheduleOnce(() => {
+        //                 this.KunoichiEnemy(index);
+        //             }, ((time+500)-Date.now())/1000);
+        //         } 
 
-            }
+        //     }
             
             
-        })
+        // })
 
         firebase.database().ref('Rooms/' + this.roomId + '/' + this.user.uid).on('child_added', snapshot => {
             if(!this.gameStart) return;
@@ -86,7 +86,7 @@ export default class GameManager extends cc.Component {
             // console.log('Enemy: ', type, ' time: ', time, ' index: ', index, ' mode: ', mode);
             if(type === 'minion'){
                 if(mode === 'die'){
-                    // console.debug("GG")
+                    console.debug("GG: ", index)
                     if(index > 0) {
                         for(let i of this.alliance_arr) {
                             if(i.getComponent(Info).index === index){
@@ -106,16 +106,30 @@ export default class GameManager extends cc.Component {
                         }
                     }
                 }
-                else if(id === 1){
-                    this.scheduleOnce(() => {
-                        this.HeavyBandit(index);
-                    }, ((time+500)-Date.now())/1000);
+                else if(mode === 'gen'){
+                    if(id === 1){
+                        this.scheduleOnce(() => {
+                            this.HeavyBandit(index);
+                        }, ((time+500)-Date.now())/1000);
+                    }
+                    else if(id === 2){
+                        this.scheduleOnce(() => {
+                            this.Kunoichi(index);
+                        }, ((time+500)-Date.now())/1000);
+                    } 
                 }
-                else if(id === 2){
-                    this.scheduleOnce(() => {
-                        this.Kunoichi(index);
-                    }, ((time+500)-Date.now())/1000);
-                } 
+                else if(mode === 'genEnemy'){
+                    if(id === 1){
+                        this.scheduleOnce(() => {
+                            this.HeavyBanditEnemy(index);
+                        }, ((time+500)-Date.now())/1000);
+                    }
+                    else if(id === 2){
+                        this.scheduleOnce(() => {
+                            this.KunoichiEnemy(index);
+                        }, ((time+500)-Date.now())/1000);
+                    } 
+                }
             }
             
             
@@ -131,7 +145,7 @@ export default class GameManager extends cc.Component {
     listen2() {
         this.index = -1
         this.invincible = true;
-        console.debug("RoomID: ", this.roomId, ' rivalID: ', this.rivalId, 'rivalName: ', this.rivalName)
+        // console.debug("RoomID: ", this.roomId, ' rivalID: ', this.rivalId, 'rivalName: ', this.rivalName)
         firebase.database().ref('Rooms/' + this.roomId + '/' + this.rivalId).on('child_added', snapshot => {
             if(!this.gameStart) return;
             let message = snapshot.val();
@@ -140,10 +154,10 @@ export default class GameManager extends cc.Component {
             let time: number = Object.values(message)[3] as number;
             let index: number = Object.values(message)[0] as number;
             let mode: string = Object.values(message)[2] as string;
-            console.log('Enemy: ', type, ' time: ', time, ' index: ', index, ' mode: ', mode);
+            // console.log('Enemy: ', type, ' time: ', time, ' index: ', index, ' mode: ', mode);
             if(type === 'minion'){
                 if(mode === 'die'){
-                    // console.debug("GG")
+                    console.debug("GG: ", index)
                     if(index > 0) {
                         for(let i of this.enemy_arr) {
                             if(i.getComponent(Info).index === index){
@@ -163,48 +177,64 @@ export default class GameManager extends cc.Component {
                         }
                     }
                 }
-                else if(id === 1){ 
-                    this.scheduleOnce(() => {
-                        this.HeavyBanditEnemy(index);
-                    }, ((time+500)-Date.now())/1000);
+                else if(mode === 'gen'){
+                    if(id === 1){ 
+                        this.scheduleOnce(() => {
+                            this.HeavyBanditEnemy(index);
+                        }, ((time+500)-Date.now())/1000);
+                    }
+                    else if(id === 2){
+                        // console.debug("FUCK")
+                        this.scheduleOnce(() => {
+                            this.KunoichiEnemy(index);
+                        }, ((time+500)-Date.now())/1000);
+                    } 
                 }
-                else if(id === 2){
-                    console.debug("FUCK")
-                    this.scheduleOnce(() => {
-                        this.KunoichiEnemy(index);
-                    }, ((time+500)-Date.now())/1000);
-                } 
+                else if(mode === 'genEnemy'){
+                    if(id === 1){ 
+                        this.scheduleOnce(() => {
+                            this.HeavyBandit(index);
+                        }, ((time+500)-Date.now())/1000);
+                    }
+                    else if(id === 2){
+                        console.debug("FUCK")
+                        this.scheduleOnce(() => {
+                            this.Kunoichi(index);
+                        }, ((time+500)-Date.now())/1000);
+                    } 
+                }
             }
             
             
         })
 
-        firebase.database().ref('Rooms/' + this.roomId + '/' + this.user.uid).on('child_added', snapshot => {
-            if(!this.gameStart) return;
-            let message = snapshot.val();
-            let type = Object.keys(message)[1];
-            let id = Object.values(message)[1];
-            let time: number = Object.values(message)[3] as number;
-            let index: number = Object.values(message)[0] as number;
-            let mode: string = Object.values(message)[2] as string;
-            // console.log('Enemy: ', type, ' time: ', time, ' index: ', index, ' mode: ', mode);
-            if(type === 'minion'){
+        // firebase.database().ref('Rooms/' + this.roomId + '/' + this.user.uid).on('child_added', snapshot => {
+        //     if(!this.gameStart) return;
+        //     let message = snapshot.val();
+        //     let type = Object.keys(message)[1];
+        //     let id = Object.values(message)[1];
+        //     let time: number = Object.values(message)[3] as number;
+        //     let index: number = Object.values(message)[0] as number;
+        //     let mode: string = Object.values(message)[2] as string;
+        //     // console.log('Enemy: ', type, ' time: ', time, ' index: ', index, ' mode: ', mode);
+        //     if(type === 'minion'){
                 
-                if(id === 1){ // 召喚HeavyBandit
-                    this.scheduleOnce(() => {
-                        this.HeavyBandit(index);
-                    }, ((time+500)-Date.now())/1000);
-                }
-                else if(id === 2){
-                    this.scheduleOnce(() => {
-                        this.Kunoichi(index);
-                    }, ((time+500)-Date.now())/1000);
-                } 
-            }
+        //         if(id === 1){ // 召喚HeavyBandit
+        //             this.scheduleOnce(() => {
+        //                 this.HeavyBandit(index);
+        //             }, ((time+500)-Date.now())/1000);
+        //         }
+        //         else if(id === 2){
+        //             this.scheduleOnce(() => {
+        //                 this.Kunoichi(index);
+        //             }, ((time+500)-Date.now())/1000);
+        //         } 
+        //     }
             
             
-        })
-        const gameStartListener = firebase.database().ref('Rooms/' + this.roomId + '/' + this.rivalId).on('child_changed', snapshot => {
+        // })
+
+        const gameStartListener = firebase.database().ref('Rooms/' + this.roomId + '/' + this.rivalId).on('child_changed', snapshot => { // 確保對方進來房間
             let message = snapshot.val();
             console.log('change: ', message)
             if(message === 'enter'){
@@ -224,7 +254,7 @@ export default class GameManager extends cc.Component {
         // }
     }
     start() {
-        firebase.database().ref('WaitingPlayer/').once('value').then(async(snapshot) => {
+        firebase.database().ref('WaitingPlayer/').once('value').then(async(snapshot) => { // 匹配ing
             if(snapshot){ 
                 let waitingPlayer = snapshot.val();
                 let userID = this.user.uid;
@@ -236,7 +266,7 @@ export default class GameManager extends cc.Component {
                     
                     let updates = {}; // 建立對戰房間
                     updates[this.rivalId] = {rivalName: this.rivalName, status: 'waiting'};
-                    updates[userID] = {userName: userName};
+                    // updates[userID] = {userName: userName};
 
                     this.roomId = (this.rivalId + this.user.uid);
 
@@ -323,12 +353,22 @@ export default class GameManager extends cc.Component {
     }
 
     async clickHeavyBanditBtn(){
-        await firebase.database().ref('Rooms/' + this.roomId + '/' + this.user.uid).push({
-            minion: 1,
-            timeStamp: Date.now(),
-            index: this.index,
-            mode: 'gen'
-        });
+        if(this.invincible){
+            await firebase.database().ref('Rooms/' + this.roomId + '/' + this.rivalId).push({
+                minion: 1,
+                timeStamp: Date.now(),
+                index: this.index,
+                mode: 'genEnemy'
+            });
+        }
+        else{
+            await firebase.database().ref('Rooms/' + this.roomId + '/' + this.user.uid).push({
+                minion: 1,
+                timeStamp: Date.now(),
+                index: this.index,
+                mode: 'gen'
+            });
+        }
 
         this.index += this.index > 0 ? 1 : -1;
 
@@ -339,12 +379,22 @@ export default class GameManager extends cc.Component {
     }
 
     async clickKonoichiBtn(){
-        await firebase.database().ref('Rooms/' + this.roomId + '/' + this.user.uid).push({
-            minion: 2,
-            timeStamp: Date.now(),
-            index: this.index,
-            mode: 'gen'
-        });
+        if(this.invincible){
+            await firebase.database().ref('Rooms/' + this.roomId + '/' + this.rivalId).push({
+                minion: 2,
+                timeStamp: Date.now(),
+                index: this.index,
+                mode: 'genEnemy'
+            });
+        }
+        else{
+            await firebase.database().ref('Rooms/' + this.roomId + '/' + this.user.uid).push({
+                minion: 2,
+                timeStamp: Date.now(),
+                index: this.index,
+                mode: 'gen'
+            });
+        }
 
         this.index += this.index > 0 ? 1 : -1;
 
