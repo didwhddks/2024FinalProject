@@ -64,14 +64,14 @@ export default class Info extends cc.Component {
         }
         if(this.life <= 0){
             this.dead = true;
-            if(!this.gameManager.invincible){
-                await firebase.database().ref('Rooms/' + this.gameManager.roomId + '/' + this.gameManager.user.uid).push({
-                    minion: 1,
-                    timeStamp: Date.now(),
-                    index: this.index,
-                    mode: 'die'
-                });
-            }
+            // if(!this.gameManager.invincible){
+            await firebase.database().ref('Rooms/' + this.gameManager.roomId + '/' + this.gameManager.user.uid).push({
+                minion: 1,
+                timeStamp: Date.now(),
+                index: this.index,
+                mode: 'die'
+            });
+            // }
             // this.scheduleOnce(() => {
             //     this.die();
             // }, 0);

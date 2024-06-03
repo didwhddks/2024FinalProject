@@ -37,8 +37,9 @@ export default class GameManager extends cc.Component {
     alliance_arr: cc.Node[] = [];
     enemy_arr: cc.Node[] = [];
 
-    invincible: boolean = false;
-    index: number = 0;
+    invincible: boolean = false; // false為玩家A，true為玩家B
+    index: number = 0; // 玩家A召喚的 > 0, 玩家B召喚的 < 0
+    gameOver: boolean = false;
 
     onLoad () {
         this.user = firebase.auth().currentUser;
@@ -55,37 +56,10 @@ export default class GameManager extends cc.Component {
         //     cc.PhysicsManager.DrawBits.e_shapeBit
         //     ;
     }
-    listen1() {
+    listen1() { // 玩家A, 負責計算
         this.index = 1;
-        // console.debug("RoomID: ", this.roomId, ' rivalID: ', this.rivalId, 'rivalName: ', this.rivalName)
-        // firebase.database().ref('Rooms/' + this.roomId + '/' + this.rivalId).on('child_added', snapshot => {
-        //     if(!this.gameStart) return;
-        //     let message = snapshot.val();
-        //     let type = Object.keys(message)[1];
-        //     let id = Object.values(message)[1];
-        //     let time: number = Object.values(message)[3] as number;
-        //     let index: number = Object.values(message)[0] as number;
-        //     let mode: string = Object.values(message)[2] as string;
-        //     // console.log('Enemy: ', type, ' time: ', time, ' index: ', index, ' mode: ', mode);
-        //     if(type === 'minion'){
-        //         if(mode === 'die') return;
-        //         else if(id === 1){
-        //             this.scheduleOnce(() => {
-        //                 this.HeavyBanditEnemy(index);
-        //             }, ((time+500)-Date.now())/1000);
-        //         }
-        //         else if(id === 2){
-        //             this.scheduleOnce(() => {
-        //                 this.KunoichiEnemy(index);
-        //             }, ((time+500)-Date.now())/1000);
-        //         } 
 
-        //     }
-            
-            
-        // })
-
-        firebase.database().ref('Rooms/' + this.roomId + '/' + this.user.uid).on('child_added', snapshot => {
+        const playerA = firebase.database().ref('Rooms/' + this.roomId + '/' + this.user.uid).on('child_added', snapshot => {
             if(!this.gameStart) return;
             let message = snapshot.val();
             let type = Object.keys(message)[1];
@@ -97,7 +71,23 @@ export default class GameManager extends cc.Component {
             if(type === 'minion'){
                 if(mode === 'die'){
                     console.debug("GG: ", index)
-                    if(index > 0) {
+                    if(index === 100000) {
+                        this.scheduleOnce(() => {
+                            firebase.database().ref('Rooms/' + this.roomId).remove(); // 移除對戰房間
+                            firebase.database().ref('Rooms/' + this.roomId + '/' + this.user.uid).off('child_added', playerA);
+                            this.gameOver = true;
+                            cc.director.loadScene('Lose');
+                        }, ((time+300)-Date.now())/1000)
+                    }
+                    else if(index === -100000){
+                        this.scheduleOnce(() => {
+                            firebase.database().ref('Rooms/' + this.roomId).remove(); // 移除對戰房間
+                            firebase.database().ref('Rooms/' + this.roomId + '/' + this.user.uid).off('child_added', playerA);
+                            this.gameOver = true;
+                            cc.director.loadScene('win');
+                        }, ((time+300)-Date.now())/1000)
+                    }
+                    else if(index > 0) {
                         for(let i of this.alliance_arr) {
                             if(i.getComponent(Info).index === index){
                                 this.scheduleOnce(() => {
@@ -153,11 +143,13 @@ export default class GameManager extends cc.Component {
             cc.find('btn4').active = true;
         }
     }
-    listen2() {
+    listen2() { // 玩家B, 不負責計算
         this.index = -1
         this.invincible = true;
+        this.alliance_arr[0].getComponent(Info).index=-100000;
+        this.enemy_arr[0].getComponent(Info).index=100000;
         // console.debug("RoomID: ", this.roomId, ' rivalID: ', this.rivalId, 'rivalName: ', this.rivalName)
-        firebase.database().ref('Rooms/' + this.roomId + '/' + this.rivalId).on('child_added', snapshot => {
+        const playerB = firebase.database().ref('Rooms/' + this.roomId + '/' + this.rivalId).on('child_added', snapshot => {
             if(!this.gameStart) return;
             let message = snapshot.val();
             let type = Object.keys(message)[1];
@@ -169,12 +161,25 @@ export default class GameManager extends cc.Component {
             if(type === 'minion'){
                 if(mode === 'die'){
                     console.debug("GG: ", index)
-                    if(index > 0) {
+                    if(index === 100000) {
+                        this.scheduleOnce(() => {
+                            firebase.database().ref('Rooms/' + this.roomId + '/' + this.rivalId).off('child_added', playerB);
+                            this.gameOver = true;
+                            cc.director.loadScene('win');
+                        }, ((time+300)-Date.now())/1000)
+                    }
+                    else if(index === -100000){
+                        this.scheduleOnce(() => {
+                            firebase.database().ref('Rooms/' + this.roomId + '/' + this.rivalId).off('child_added', playerB);
+                            this.gameOver = true;
+                            cc.director.loadScene('Lose');
+                        }, ((time+300)-Date.now())/1000)
+                    } 
+                    else if(index > 0) {
                         for(let i of this.enemy_arr) {
                             console.debug(i.getComponent(Info).index);
                             if(i.getComponent(Info).index === index){
                                 this.scheduleOnce(() => {
-                                    
                                     i.getComponent(Info).die();
                                 }, ((time+300)-Date.now())/1000)
                             }
@@ -210,7 +215,6 @@ export default class GameManager extends cc.Component {
                         }, ((time+500)-Date.now())/1000);
                     }
                     else if(id === 2){
-                        console.debug("FUCK")
                         this.scheduleOnce(() => {
                             this.Kunoichi(index);
                         }, ((time+500)-Date.now())/1000);
@@ -221,55 +225,21 @@ export default class GameManager extends cc.Component {
             
         })
 
-        // firebase.database().ref('Rooms/' + this.roomId + '/' + this.user.uid).on('child_added', snapshot => {
-        //     if(!this.gameStart) return;
-        //     let message = snapshot.val();
-        //     let type = Object.keys(message)[1];
-        //     let id = Object.values(message)[1];
-        //     let time: number = Object.values(message)[3] as number;
-        //     let index: number = Object.values(message)[0] as number;
-        //     let mode: string = Object.values(message)[2] as string;
-        //     // console.log('Enemy: ', type, ' time: ', time, ' index: ', index, ' mode: ', mode);
-        //     if(type === 'minion'){
-                
-        //         if(id === 1){ // 召喚HeavyBandit
-        //             this.scheduleOnce(() => {
-        //                 this.HeavyBandit(index);
-        //             }, ((time+500)-Date.now())/1000);
-        //         }
-        //         else if(id === 2){
-        //             this.scheduleOnce(() => {
-        //                 this.Kunoichi(index);
-        //             }, ((time+500)-Date.now())/1000);
-        //         } 
-        //     }
-            
-            
-        // })
-
         const gameStartListener = firebase.database().ref('Rooms/' + this.roomId + '/' + this.rivalId).on('child_changed', snapshot => { // 確保對方進來房間
             let message = snapshot.val();
             console.log('change: ', message)
             if(message === 'enter'){
                this.gameStart = true;
-               console.debug("listen2:",this.base,this.enemy_base);
-               this.alliance_arr[0].getComponent(Info).index=-100000;
-               this.enemy_arr[0].getComponent(Info).index=100000;        
+               console.debug("listen2:",this.base,this.enemy_base);        
                cc.find('ColorBlack').active = false;
                cc.find('btn1').active = true;
                cc.find('btn4').active = true;
-               firebase.database().ref('Rooms/' + this.roomId + '/' + this.rivalId).on('child_changed', gameStartListener)
+               firebase.database().ref('Rooms/' + this.roomId + '/' + this.rivalId).off('child_changed', gameStartListener)
             }        
             
         })
-
-        // if(!this.gameStart){
-            // cc.find('ColorBlack').active = false;
-            // cc.find('btn1').active = true;
-            // cc.find('btn4').active = true;
-        // }
     }
-    start() {
+    start() { // 裡面都是匹配相關的code
         firebase.database().ref('WaitingPlayer/').once('value').then(async(snapshot) => { // 匹配ing
             if(snapshot){ 
                 let waitingPlayer = snapshot.val();
@@ -278,23 +248,14 @@ export default class GameManager extends cc.Component {
                 if(waitingPlayer){ // 成功匹配
                     this.rivalId = Object.keys(waitingPlayer)[0];
                     this.rivalName = Object.values(Object.values(waitingPlayer)[0])[0];
-                    // console.debug(this.rivalId, this.rivalName)
                     
                     let updates = {}; // 建立對戰房間
                     updates[this.rivalId] = {rivalName: this.rivalName, status: 'waiting'};
-                    // updates[userID] = {userName: userName};
 
                     this.roomId = (this.rivalId + this.user.uid);
 
-                    // cc.find('Persist').getComponent('Persist').player = 'A';
-                    // cc.find('Persist').getComponent('Persist').roomId = roomId;
-                    // cc.find('Persist').getComponent('Persist').rivalId = rivalId;
-
                     await firebase.database().ref('Rooms/' + this.roomId).set(updates);
                     this.listen2();
-                    // const tmp=this.alliance_arr[0];
-                    // this.alliance_arr[0]=this.enemy_arr[0];
-                    // this.enemy_arr[0]=tmp;
                     await firebase.database().ref('WaitingPlayer/' + this.rivalId).remove(); // 從等待列表移除
 
                 }
@@ -305,7 +266,7 @@ export default class GameManager extends cc.Component {
                     cc.find('Persist').getComponent('Persist').player = 'A';
                     console.debug("Waiting...");
 
-                    //TODO: 監聽Rooms, 若讀到自己的userID, change the status to 'enter'
+                    // 監聽Rooms, 若讀到自己的userID, change the status to 'enter'
                     const matchingListener = firebase.database().ref('Rooms').on('value', async snapshot => {
                         // firebase.database().ref('Rooms/').once('value').then(async(snapshot) => {
                         const roomData = snapshot.val();
@@ -348,7 +309,10 @@ export default class GameManager extends cc.Component {
         })
     }
     update(dt: number): void { 
-        if(!this.gameStart){
+        if(!this.gameStart) return;
+        if(this.gameOver){
+            this.HeavyBanditBtn.interactable = false;
+            this.KunoichiBtn.interactable = false;
             return;
         }
         else{
@@ -364,35 +328,6 @@ export default class GameManager extends cc.Component {
             }
             this.alliance_arr = this.alliance_arr.filter(alliance => alliance.getComponent(Info).dead !== true); // 清理array
             this.enemy_arr = this.enemy_arr.filter(enemy => enemy.getComponent(Info).dead !== true);    
-            this.check();
-        }
-    }
-
-    check()
-    {
-        if(this.alliance_arr[0]!==this.base&&this.enemy_arr[0]!==this.enemy_base) //平手
-        {
-            
-        }
-        else if(!this.invincible&&this.enemy_arr[0]!==this.enemy_base)
-        {
-            console.debug("1",this.enemy_arr[0]===this.enemy_base,this.alliance_arr[0]===this.base);
-            cc.director.loadScene("win");
-        }
-        else if(!this.invincible&&this.enemy_arr[0]===this.enemy_base&&this.alliance_arr[0]!==this.base)
-        {
-            console.debug("2",this.enemy_arr[0]===this.enemy_base,this.alliance_arr[0]===this.base);
-            cc.director.loadScene("Lose");
-        }
-        else if(this.invincible&&this.alliance_arr[0]!==this.base)
-        {
-            console.debug("3",this.enemy_arr[0]===this.enemy_base,this.alliance_arr[0]===this.base);
-            cc.director.loadScene("Lose");
-        }
-        else if(this.invincible&&this.alliance_arr[0]===this.base&&this.enemy_arr[0]!==this.enemy_base)
-        {
-            console.debug("4",this.enemy_arr[0]===this.enemy_base,this.alliance_arr[0]===this.base);
-            cc.director.loadScene("win");
         }
     }
 
@@ -459,10 +394,8 @@ export default class GameManager extends cc.Component {
         tmp.x = this.base.x-(this.base.width>>1)-40;
         tmp.y = 145;
         tmp.getComponent(Info).index= index;
-        // if(this.invincible) tmp.getComponent(Info).life = 99999;
 
         this.alliance_arr.push(tmp);
-        console.debug(this.alliance_arr)
     }
     HeavyBanditEnemy(index: number) {
         let tmp = cc.instantiate(this.heavyBanditEnemy);
@@ -470,7 +403,6 @@ export default class GameManager extends cc.Component {
         tmp.x = this.enemy_base.x+(this.enemy_base.width>>1)+40;
         tmp.y = 145;
         tmp.getComponent(Info).index= index;
-        // if(this.invincible) tmp.getComponent(Info).life = 99999;
 
         this.enemy_arr.push(tmp);
     }
@@ -478,18 +410,20 @@ export default class GameManager extends cc.Component {
     KunoichiEnemy(index: number) {
         let tmp = cc.instantiate(this.kunoichiEnemy);
         tmp.setParent(cc.director.getScene());
-        tmp.x = 40;
+        tmp.x = this.enemy_base.x+(this.enemy_base.width>>1)+40;
         tmp.y = 145;
         tmp.getComponent(Info).index= index;
+
         this.enemy_arr.push(tmp);
     }
 
     Kunoichi(index: number) {
         let tmp = cc.instantiate(this.kunoichi);
         tmp.setParent(cc.director.getScene());
-        tmp.x = 900;
+        tmp.x = this.base.x-(this.base.width>>1)-40;
         tmp.y = 145;
         tmp.getComponent(Info).index= index;
+
         this.alliance_arr.push(tmp);
     }
 }

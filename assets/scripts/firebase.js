@@ -11,13 +11,13 @@
 //# sourceMappingURL=firebase-database.js.map
 
 const config = {
-  apiKey: "AIzaSyC41z8KMSKYMgg0mq8DQFJVBjym16Sfwgo",
-  authDomain: "finaltest-dd460.firebaseapp.com",
-  databaseURL: "https://finaltest-dd460-default-rtdb.firebaseio.com",
-  projectId: "finaltest-dd460",
-  storageBucket: "finaltest-dd460.appspot.com",
-  messagingSenderId: "95319631716",
-  appId: "1:95319631716:web:83d353c9326f11b293bc71",
-  measurementId: "G-QVR4GX13R5"
+  apiKey: "AIzaSyC45fLx4QugmdYq-BRtXftJhdJjiPuvOCQ",
+  authDomain: "finalproject-ea802.firebaseapp.com",
+  databaseURL: "https://finalproject-ea802-default-rtdb.firebaseio.com",
+  projectId: "finalproject-ea802",
+  storageBucket: "finalproject-ea802.appspot.com",
+  messagingSenderId: "710187454880",
+  appId: "1:710187454880:web:e350042988c1fe16da14c5",
+  measurementId: "G-5PMBX4PEWM"
 };
   firebase.initializeApp(config);
