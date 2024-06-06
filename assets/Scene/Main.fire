@@ -44,7 +44,7 @@
         "__id__": 25
       }
     ],
-    "_active": true,
+    "_active": false,
     "_components": [],
     "_prefab": null,
     "_opacity": 255,
@@ -1694,7 +1694,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "Tile_1",
+    "_name": "Ground",
     "_objFlags": 0,
     "_parent": {
       "__id__": 1
@@ -1778,7 +1778,7 @@
     "_spriteFrame": {
       "__uuid__": "d2f31bd5-3147-4748-a7f5-9c5a204aa253"
     },
-    "_type": 0,
+    "_type": 2,
     "_sizeMode": 0,
     "_fillType": 0,
     "_fillCenter": {
