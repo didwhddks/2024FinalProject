@@ -1,6 +1,7 @@
 declare const firebase: any;
 
 import Info from "./Info";
+import KeyboardManager from "./KeyboardManager";
 import Shake from "./Shake";
 
 const {ccclass, property} = cc._decorator;
@@ -109,6 +110,8 @@ export default class GameManager extends cc.Component {
                         firebase.database().ref('Rooms/' + this.roomId).remove(); // 移除對戰房間
                         firebase.database().ref('Rooms/' + this.roomId + '/' + this.user.uid).off('child_added', playerA);
                         this.gameOver = true;
+                        cc.systemEvent.off(cc.SystemEvent.EventType.KEY_DOWN);
+                        cc.systemEvent.off(cc.SystemEvent.EventType.KEY_UP);
                         cc.director.loadScene('Lose');
                     }, ((time+300)-Date.now())/1000)
                 }
@@ -117,6 +120,8 @@ export default class GameManager extends cc.Component {
                         firebase.database().ref('Rooms/' + this.roomId).remove(); // 移除對戰房間
                         firebase.database().ref('Rooms/' + this.roomId + '/' + this.user.uid).off('child_added', playerA);
                         this.gameOver = true;
+                        cc.systemEvent.off(cc.SystemEvent.EventType.KEY_DOWN);
+                        cc.systemEvent.off(cc.SystemEvent.EventType.KEY_UP);
                         cc.director.loadScene('win');
                     }, ((time+300)-Date.now())/1000)
                 }
@@ -174,6 +179,7 @@ export default class GameManager extends cc.Component {
             cc.find('ColorBlack').active = false;
             cc.find('Canvas/Main Camera/btn1').active = true;
             cc.find('Canvas/Main Camera/btn4').active = true;
+            this.getComponent(KeyboardManager).enableKeyboard();
         }
     }
     listen2() { // 玩家B, 不負責計算
@@ -220,6 +226,8 @@ export default class GameManager extends cc.Component {
                     this.scheduleOnce(() => {
                         firebase.database().ref('Rooms/' + this.roomId + '/' + this.rivalId).off('child_added', playerB);
                         this.gameOver = true;
+                        cc.systemEvent.off(cc.SystemEvent.EventType.KEY_DOWN);
+                        cc.systemEvent.off(cc.SystemEvent.EventType.KEY_UP);
                         cc.director.loadScene('win');
                     }, ((time+300)-Date.now())/1000)
                 }
@@ -227,6 +235,8 @@ export default class GameManager extends cc.Component {
                     this.scheduleOnce(() => {
                         firebase.database().ref('Rooms/' + this.roomId + '/' + this.rivalId).off('child_added', playerB);
                         this.gameOver = true;
+                        cc.systemEvent.off(cc.SystemEvent.EventType.KEY_DOWN);
+                        cc.systemEvent.off(cc.SystemEvent.EventType.KEY_UP);
                         cc.director.loadScene('Lose');
                     }, ((time+300)-Date.now())/1000)
                 } 
@@ -289,6 +299,7 @@ export default class GameManager extends cc.Component {
                cc.find('ColorBlack').active = false;
                cc.find('Canvas/Main Camera/btn1').active = true;
                cc.find('Canvas/Main Camera/btn4').active = true;
+               this.getComponent(KeyboardManager).enableKeyboard();
                firebase.database().ref('Rooms/' + this.roomId + '/' + this.rivalId).off('child_changed', gameStartListener)
             }        
             
