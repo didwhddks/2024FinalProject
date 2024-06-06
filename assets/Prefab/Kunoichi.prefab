@@ -318,6 +318,9 @@
     },
     "_enabled": true,
     "gameManager": null,
+    "attackAudio": {
+      "__uuid__": "c0615dc0-aef6-4f78-8f09-c938f92b0502"
+    },
     "_id": ""
   },
   {
@@ -331,6 +334,7 @@
     "dieFrame": {
       "__uuid__": "be917c01-af81-464f-87c2-c87b6088fdc7"
     },
+    "gameManager": null,
     "_id": ""
   },
   {

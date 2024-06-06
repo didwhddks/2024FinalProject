@@ -32,6 +32,11 @@ export default class GameManager extends cc.Component {
     rivalId = null;
     rivalName = null;
 
+    money: number = 100;
+    moneyUpdateSpeed: number = 1;
+
+    heavyBanditCost: number = 10;
+    kunoichiCost: number = 20;
 
     gameStart: boolean = false;
     alliance_arr: cc.Node[] = [];
@@ -315,7 +320,12 @@ export default class GameManager extends cc.Component {
             this.KunoichiBtn.interactable = false;
             return;
         }
-        else{
+        else {
+            
+            this.money += this.moneyUpdateSpeed * dt;
+
+            this.HeavyBanditBtn.interactable = this.money >= this.heavyBanditCost;
+            this.KunoichiBtn.interactable = this.money >= this.kunoichiCost;
 
             if(!this.invincible){
                 for(let i of this.alliance_arr) {  // 實際打出傷害
@@ -336,7 +346,8 @@ export default class GameManager extends cc.Component {
         cc.director.loadScene('Menu');
     }
 
-    async clickHeavyBanditBtn(){
+    async clickHeavyBanditBtn() {
+        if (this.money < this.heavyBanditCost) return;
         if(this.invincible){
             await firebase.database().ref('Rooms/' + this.roomId + '/' + this.rivalId).push({
                 minion: 1,
@@ -355,6 +366,7 @@ export default class GameManager extends cc.Component {
         }
 
         this.index += this.index > 0 ? 1 : -1;
+        this.money -= this.heavyBanditCost;
 
         this.HeavyBanditBtn.interactable = false;
         this.scheduleOnce(() => {
@@ -362,7 +374,8 @@ export default class GameManager extends cc.Component {
         }, 0.5);        
     }
 
-    async clickKonoichiBtn(){
+    async clickKonoichiBtn() {
+        if (this.money < this.kunoichiCost) return;
         if(this.invincible){
             await firebase.database().ref('Rooms/' + this.roomId + '/' + this.rivalId).push({
                 minion: 2,
@@ -381,6 +394,7 @@ export default class GameManager extends cc.Component {
         }
 
         this.index += this.index > 0 ? 1 : -1;
+        this.money -= this.kunoichiCost;
 
         this.KunoichiBtn.interactable = false;
         this.scheduleOnce(() => {
@@ -393,7 +407,7 @@ export default class GameManager extends cc.Component {
         tmp.setParent(cc.director.getScene());
         tmp.x = this.base.x-(this.base.width>>1)-40;
         tmp.y = 145;
-        tmp.getComponent(Info).index= index;
+        tmp.getComponent(Info).index = index;
 
         this.alliance_arr.push(tmp);
     }

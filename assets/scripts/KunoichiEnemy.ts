@@ -16,6 +16,9 @@ export default class KunoichiEnemy extends cc.Component {
     @property(GameManager)
     gameManager: GameManager = null;
 
+    @property(cc.AudioClip)
+    attackAudio: cc.AudioClip = null;
+
     speedX: number = 200;
     state: State = State.Move;
 
@@ -76,6 +79,7 @@ export default class KunoichiEnemy extends cc.Component {
         if(state === State.Attack) {
             if(this.attackReady){
                 this.getComponent(cc.Animation).play('attack');
+                cc.audioEngine.playEffect(this.attackAudio, false);
                 this.attackReady = false;
             }
             else{
