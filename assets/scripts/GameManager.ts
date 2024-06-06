@@ -1,6 +1,7 @@
 declare const firebase: any;
 
 import Info from "./Info";
+import Shake from "./Shake";
 
 const {ccclass, property} = cc._decorator;
 
@@ -27,6 +28,9 @@ export default class GameManager extends cc.Component {
     @property(cc.Node)
     base:cc.Node=null;
 
+    @property(cc.Node)
+    blood:cc.Node=null;
+
     user = null;
     roomId = null;
     rivalId = null;
@@ -46,6 +50,8 @@ export default class GameManager extends cc.Component {
     index: number = 0; // 玩家A召喚的 > 0, 玩家B召喚的 < 0
     gameOver: boolean = false;
 
+    blood_exist: boolean = false;
+
     onLoad () {
         this.user = firebase.auth().currentUser;
         cc.director.getPhysicsManager().enabled = true;
@@ -63,7 +69,6 @@ export default class GameManager extends cc.Component {
     }
     listen1() { // 玩家A, 負責計算
         this.index = 1;
-
         const playerA = firebase.database().ref('Rooms/' + this.roomId + '/' + this.user.uid).on('child_added', snapshot => {
             if(!this.gameStart) return;
             let message = snapshot.val();
@@ -77,6 +82,8 @@ export default class GameManager extends cc.Component {
                 if(index === 100000){
                     this.scheduleOnce(() => {
                         this.base.children[0].getComponent(cc.Sprite).fillRange = id / this.base.getComponent(Info).default_life;
+                        this.getComponent(Shake).play();
+                        if(!this.blood_exist) this.SoManyBlood()
                     }, ((time+300)-Date.now())/1000)
                 }
                 else{
@@ -180,6 +187,8 @@ export default class GameManager extends cc.Component {
                     this.scheduleOnce(() => {
                         console.debug("CASTLE HURT");
                         this.base.children[0].getComponent(cc.Sprite).fillRange = id / this.base.getComponent(Info).default_life;
+                        if(!this.blood_exist) this.SoManyBlood()
+                        this.getComponent(Shake).play();
                     }, ((time+300)-Date.now())/1000)
                 }
                 else{
@@ -464,5 +473,11 @@ export default class GameManager extends cc.Component {
         tmp.getComponent(Info).index= index;
 
         this.alliance_arr.push(tmp);
+    }
+
+    SoManyBlood(){
+        this.blood_exist = true;
+        let action = cc.sequence(cc.toggleVisibility(), cc.fadeOut(1.5), cc.callFunc(() => { this.blood_exist = false; }));
+        this.blood.runAction(action);
     }
 }
