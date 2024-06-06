@@ -710,6 +710,12 @@
     "blood": {
       "__id__": 360
     },
+    "bgm": {
+      "__uuid__": "744dbeec-9de3-498c-a20b-d499f6e14160"
+    },
+    "waiting_bgm": {
+      "__uuid__": "b7c5efc7-fdae-45e7-afd7-9165b1bad93f"
+    },
     "_id": "ac/2R/LiJARb+5P3n0aXEW"
   },
   {
