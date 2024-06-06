@@ -56,7 +56,9 @@ export default class GameManager extends cc.Component {
         this.user = firebase.auth().currentUser;
         cc.director.getPhysicsManager().enabled = true;
         this.base.getComponent(Info).index=100000;
+        this.base.x = 1600;
         this.enemy_base.getComponent(Info).index=-100000;
+        this.enemy_base.x = -640;
         this.alliance_arr.push(this.base);
         this.enemy_arr.push(this.enemy_base);
         // 看碰撞體
@@ -163,8 +165,8 @@ export default class GameManager extends cc.Component {
             console.debug("listen1:",this.base,this.enemy_base);
             this.gameStart = true;
             cc.find('ColorBlack').active = false;
-            cc.find('btn1').active = true;
-            cc.find('btn4').active = true;
+            cc.find('Canvas/Main Camera/btn1').active = true;
+            cc.find('Canvas/Main Camera/btn4').active = true;
         }
     }
     listen2() { // 玩家B, 不負責計算
@@ -271,8 +273,8 @@ export default class GameManager extends cc.Component {
                this.gameStart = true;
                console.debug("listen2:",this.base,this.enemy_base);        
                cc.find('ColorBlack').active = false;
-               cc.find('btn1').active = true;
-               cc.find('btn4').active = true;
+               cc.find('Canvas/Main Camera/btn1').active = true;
+               cc.find('Canvas/Main Camera/btn4').active = true;
                firebase.database().ref('Rooms/' + this.roomId + '/' + this.rivalId).off('child_changed', gameStartListener)
             }        
             
