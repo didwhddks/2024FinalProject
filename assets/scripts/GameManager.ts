@@ -477,7 +477,8 @@ export default class GameManager extends cc.Component {
 
     SoManyBlood(){
         this.blood_exist = true;
-        let action = cc.sequence(cc.toggleVisibility(), cc.fadeOut(1.5), cc.callFunc(() => { this.blood_exist = false; }));
+        this.blood.opacity = 255;
+        let action = cc.sequence(cc.fadeOut(0.5), cc.callFunc(() => { this.blood_exist = false; }));
         this.blood.runAction(action);
     }
 }
