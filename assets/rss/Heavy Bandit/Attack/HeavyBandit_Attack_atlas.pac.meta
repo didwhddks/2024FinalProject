@@ -1,0 +1,23 @@
+{
+  "ver": "1.2.5",
+  "uuid": "090f38cb-1d4e-4121-9675-6d864f663294",
+  "importer": "auto-atlas",
+  "maxWidth": 1024,
+  "maxHeight": 1024,
+  "padding": 2,
+  "compressionLevel": 6,
+  "allowRotation": true,
+  "forceSquared": false,
+  "powerOfTwo": false,
+  "algorithm": "MaxRects",
+  "format": "png",
+  "quality": 80,
+  "contourBleed": true,
+  "paddingBleed": true,
+  "filterUnused": true,
+  "packable": false,
+  "premultiplyAlpha": false,
+  "filterMode": "point",
+  "platformSettings": {},
+  "subMetas": {}
+}
