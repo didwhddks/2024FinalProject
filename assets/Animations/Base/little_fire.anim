@@ -1,9 +1,35 @@
 {
   "__type__": "cc.AnimationClip",
-  "_name": "",
+  "_name": "little_fire",
   "_objFlags": 0,
+  "_native": "",
   "_duration": 0,
   "sample": 60,
-  "curveData": {},
+  "speed": 1,
+  "wrapMode": 1,
+  "curveData": {
+    "paths": {
+      "little_fire": {
+        "props": {
+          "active": [
+            {
+              "frame": 0,
+              "value": true
+            }
+          ]
+        }
+      },
+      "big_fire": {
+        "props": {
+          "active": [
+            {
+              "frame": 0,
+              "value": false
+            }
+          ]
+        }
+      }
+    }
+  },
   "events": []
 }
