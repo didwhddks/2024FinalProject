@@ -25,8 +25,8 @@ export default class Shake extends cc.Component
     onLoad()
     {
         // this.shake_effect=cc.sequence(cc.moveBy(0.5,-100,100),cc.moveBy(0.5,100,100),cc.moveBy(0.5,100,-100),cc.moveBy(0.5,-100,-100));
-        this.init_x=this.target.x;
-        this.init_y=this.target.y;
+        // this.init_x=this.target.x;
+        // this.init_y=this.target.y;
     }
 
     // start () {
@@ -56,6 +56,8 @@ export default class Shake extends cc.Component
     {
         // cc.find("Canvas/Main Camera").runAction(this.shake_effect);
         if(this.playing) return;
+        this.init_x=this.target.x;
+        this.init_y=this.target.y;
         this.playing=true;
     }
     // update (dt) {}
