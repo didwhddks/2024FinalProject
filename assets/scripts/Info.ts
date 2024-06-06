@@ -13,11 +13,11 @@ export default class Info extends cc.Component {
     @property(GameManager)
     gameManager: GameManager = null;
 
-    life: number = 100;
+    life: number = 200;
     dead: boolean = false;
 
     getDamage: number= 0;
-    default_life =100;
+    default_life = 200;
 
     index: number = 0;
 
@@ -63,7 +63,7 @@ export default class Info extends cc.Component {
         {
             if(tmp){
                 await firebase.database().ref('Rooms/' + this.gameManager.roomId + '/' + this.gameManager.user.uid).push({
-                    minion: 0,
+                    minion: this.life, // 這邊傳的是城堡剩餘血量
                     timeStamp: Date.now(),
                     index: this.index,
                     mode: 'castleHurt'

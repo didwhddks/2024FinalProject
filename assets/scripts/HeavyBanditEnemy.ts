@@ -31,6 +31,7 @@ export default class HeavyBanditEnemy extends cc.Component {
 
 
     start () {
+        this.node.getComponent(Info).life = 100;
         this.getComponent(cc.Animation).play('move');
         this.gameManager = cc.find('GameManager').getComponent(GameManager);
     }

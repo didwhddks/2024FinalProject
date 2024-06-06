@@ -30,6 +30,7 @@ export default class HeavyBandit extends cc.Component {
 
 
     start () {
+        this.node.getComponent(Info).life = 100;
         this.getComponent(cc.Animation).play('move');
         this.gameManager = cc.find('GameManager').getComponent(GameManager);
     }
