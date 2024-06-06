@@ -83,7 +83,14 @@ export default class GameManager extends cc.Component {
             if(mode === 'castleHurt'){
                 if(index === 100000){
                     this.scheduleOnce(() => {
-                        this.base.children[0].getComponent(cc.Sprite).fillRange = id / this.base.getComponent(Info).default_life;
+                        const life_percent = id / this.base.getComponent(Info).default_life;
+                        this.base.children[0].getComponent(cc.Sprite).fillRange = life_percent;
+                        if (life_percent < 0.667 && life_percent > 0.333) {
+                            this.base.getComponent(cc.Animation).play('little_fire');
+                        }
+                        else if (life_percent < 0.333) {
+                            this.base.getComponent(cc.Animation).play('big_fire');
+                        }
                         this.getComponent(Shake).play();
                         if(!this.blood_exist) this.SoManyBlood()
                     }, ((time+300)-Date.now())/1000)
@@ -188,7 +195,14 @@ export default class GameManager extends cc.Component {
                 if(index === -100000){
                     this.scheduleOnce(() => {
                         console.debug("CASTLE HURT");
-                        this.base.children[0].getComponent(cc.Sprite).fillRange = id / this.base.getComponent(Info).default_life;
+                        const life_percent = id / this.base.getComponent(Info).default_life;
+                        this.base.children[0].getComponent(cc.Sprite).fillRange = life_percent;
+                        if (life_percent < 0.667 && life_percent > 0.333) {
+                            this.base.getComponent(cc.Animation).play('little_fire');
+                        }
+                        else if (life_percent < 0.333) {
+                            this.base.getComponent(cc.Animation).play('big_fire');
+                        }
                         if(!this.blood_exist) this.SoManyBlood()
                         this.getComponent(Shake).play();
                     }, ((time+300)-Date.now())/1000)
