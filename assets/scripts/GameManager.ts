@@ -98,7 +98,14 @@ export default class GameManager extends cc.Component {
                 }
                 else{
                     this.scheduleOnce(() => {
-                        this.enemy_base.children[0].getComponent(cc.Sprite).fillRange = id / this.enemy_base.getComponent(Info).default_life;
+                        const life_percent = id / this.enemy_base.getComponent(Info).default_life;
+                        this.enemy_base.children[0].getComponent(cc.Sprite).fillRange = life_percent;
+                        if (life_percent < 0.667 && life_percent > 0.333) {
+                            this.enemy_base.getComponent(cc.Animation).play('little_fire');
+                        }
+                        else if (life_percent < 0.333) {
+                            this.enemy_base.getComponent(cc.Animation).play('big_fire');
+                        }
                     }, ((time+300)-Date.now())/1000)
                 }
             }
@@ -215,7 +222,14 @@ export default class GameManager extends cc.Component {
                 }
                 else{
                     this.scheduleOnce(() => {
-                        this.enemy_base.children[0].getComponent(cc.Sprite).fillRange = id / this.enemy_base.getComponent(Info).default_life;
+                        const life_percent = id / this.enemy_base.getComponent(Info).default_life;
+                        this.enemy_base.children[0].getComponent(cc.Sprite).fillRange = life_percent;
+                        if (life_percent < 0.667 && life_percent > 0.333) {
+                            this.enemy_base.getComponent(cc.Animation).play('little_fire');
+                        }
+                        else if (life_percent < 0.333) {
+                            this.enemy_base.getComponent(cc.Animation).play('big_fire');
+                        }
                     }, ((time+300)-Date.now())/1000)
                 }
             }
