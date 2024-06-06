@@ -1827,7 +1827,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "Ground",
+    "_name": "Tile_1",
     "_objFlags": 0,
     "_parent": {
       "__id__": 1
@@ -1911,7 +1911,7 @@
     "_spriteFrame": {
       "__uuid__": "d2f31bd5-3147-4748-a7f5-9c5a204aa253"
     },
-    "_type": 2,
+    "_type": 0,
     "_sizeMode": 0,
     "_fillType": 0,
     "_fillCenter": {
