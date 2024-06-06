@@ -67,75 +67,80 @@ export default class GameManager extends cc.Component {
         const playerA = firebase.database().ref('Rooms/' + this.roomId + '/' + this.user.uid).on('child_added', snapshot => {
             if(!this.gameStart) return;
             let message = snapshot.val();
-            let type = Object.keys(message)[1];
+            //let type = Object.keys(message)[1];
             let id = Object.values(message)[1];
             let time: number = Object.values(message)[3] as number;
             let index: number = Object.values(message)[0] as number;
             let mode: string = Object.values(message)[2] as string;
             // console.log('Enemy: ', type, ' time: ', time, ' index: ', index, ' mode: ', mode);
-            if(type === 'minion'){
-                if(mode === 'die'){
-                    console.debug("GG: ", index)
-                    if(index === 100000) {
-                        this.scheduleOnce(() => {
-                            firebase.database().ref('Rooms/' + this.roomId).remove(); // 移除對戰房間
-                            firebase.database().ref('Rooms/' + this.roomId + '/' + this.user.uid).off('child_added', playerA);
-                            this.gameOver = true;
-                            cc.director.loadScene('Lose');
-                        }, ((time+300)-Date.now())/1000)
-                    }
-                    else if(index === -100000){
-                        this.scheduleOnce(() => {
-                            firebase.database().ref('Rooms/' + this.roomId).remove(); // 移除對戰房間
-                            firebase.database().ref('Rooms/' + this.roomId + '/' + this.user.uid).off('child_added', playerA);
-                            this.gameOver = true;
-                            cc.director.loadScene('win');
-                        }, ((time+300)-Date.now())/1000)
-                    }
-                    else if(index > 0) {
-                        for(let i of this.alliance_arr) {
-                            if(i.getComponent(Info).index === index){
-                                this.scheduleOnce(() => {
-                                    i.getComponent(Info).die();
-                                }, ((time+300)-Date.now())/1000)
-                            }
-                        }
-                    }
-                    else {
-                        for(let i of this.enemy_arr) {
-                            if(i.getComponent(Info).index === index){
-                                this.scheduleOnce(() => {
-                                    i.getComponent(Info).die();
-                                }, ((time+300)-Date.now())/1000)
-                            }
+            if(mode === 'castleHurt'){
+                this.scheduleOnce(() => {
+                    console.debug(index, "hurt");
+                }, ((time+300)-Date.now())/1000)
+            }
+            //if(type === 'minion'){
+            else if(mode === 'die'){
+                console.debug("GG: ", index)
+                if(index === 100000) {
+                    this.scheduleOnce(() => {
+                        firebase.database().ref('Rooms/' + this.roomId).remove(); // 移除對戰房間
+                        firebase.database().ref('Rooms/' + this.roomId + '/' + this.user.uid).off('child_added', playerA);
+                        this.gameOver = true;
+                        cc.director.loadScene('Lose');
+                    }, ((time+300)-Date.now())/1000)
+                }
+                else if(index === -100000){
+                    this.scheduleOnce(() => {
+                        firebase.database().ref('Rooms/' + this.roomId).remove(); // 移除對戰房間
+                        firebase.database().ref('Rooms/' + this.roomId + '/' + this.user.uid).off('child_added', playerA);
+                        this.gameOver = true;
+                        cc.director.loadScene('win');
+                    }, ((time+300)-Date.now())/1000)
+                }
+                else if(index > 0) {
+                    for(let i of this.alliance_arr) {
+                        if(i.getComponent(Info).index === index){
+                            this.scheduleOnce(() => {
+                                i.getComponent(Info).die();
+                            }, ((time+300)-Date.now())/1000)
                         }
                     }
                 }
-                else if(mode === 'gen'){
-                    if(id === 1){
-                        this.scheduleOnce(() => {
-                            this.HeavyBandit(index);
-                        }, ((time+500)-Date.now())/1000);
+                else {
+                    for(let i of this.enemy_arr) {
+                        if(i.getComponent(Info).index === index){
+                            this.scheduleOnce(() => {
+                                i.getComponent(Info).die();
+                            }, ((time+300)-Date.now())/1000)
+                        }
                     }
-                    else if(id === 2){
-                        this.scheduleOnce(() => {
-                            this.Kunoichi(index);
-                        }, ((time+500)-Date.now())/1000);
-                    } 
-                }
-                else if(mode === 'genEnemy'){
-                    if(id === 1){
-                        this.scheduleOnce(() => {
-                            this.HeavyBanditEnemy(index);
-                        }, ((time+500)-Date.now())/1000);
-                    }
-                    else if(id === 2){
-                        this.scheduleOnce(() => {
-                            this.KunoichiEnemy(index);
-                        }, ((time+500)-Date.now())/1000);
-                    } 
                 }
             }
+            else if(mode === 'gen'){
+                if(id === 1){
+                    this.scheduleOnce(() => {
+                        this.HeavyBandit(index);
+                    }, ((time+500)-Date.now())/1000);
+                }
+                else if(id === 2){
+                    this.scheduleOnce(() => {
+                        this.Kunoichi(index);
+                    }, ((time+500)-Date.now())/1000);
+                } 
+            }
+            else if(mode === 'genEnemy'){
+                if(id === 1){
+                    this.scheduleOnce(() => {
+                        this.HeavyBanditEnemy(index);
+                    }, ((time+500)-Date.now())/1000);
+                }
+                else if(id === 2){
+                    this.scheduleOnce(() => {
+                        this.KunoichiEnemy(index);
+                    }, ((time+500)-Date.now())/1000);
+                } 
+            }
+            //}
             
             
         })

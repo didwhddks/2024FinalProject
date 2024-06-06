@@ -56,17 +56,26 @@ export default class Info extends cc.Component {
         if(this.dead) return;
 
         this.life -= this.getDamage;
+        let tmp = this.getDamage;
         this.getDamage = 0;
         if(!this.is_base()) this.node.children[0].getComponent(cc.Label).string = this.life.toString();
-        else
+        else // castle
         {
-            this.node.children[0].getComponent(cc.Sprite).fillRange=this.life/this.default_life;
+            if(tmp){
+                await firebase.database().ref('Rooms/' + this.gameManager.roomId + '/' + this.gameManager.user.uid).push({
+                    minion: 0,
+                    timeStamp: Date.now(),
+                    index: this.index,
+                    mode: 'castleHurt'
+                });
+            }
+            //this.node.children[0].getComponent(cc.Sprite).fillRange=this.life/this.default_life;
         }
         if(this.life <= 0){
             this.dead = true;
             // if(!this.gameManager.invincible){
             await firebase.database().ref('Rooms/' + this.gameManager.roomId + '/' + this.gameManager.user.uid).push({
-                minion: 1,
+                minion: 0,
                 timeStamp: Date.now(),
                 index: this.index,
                 mode: 'die'

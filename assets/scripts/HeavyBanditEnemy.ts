@@ -77,7 +77,7 @@ export default class HeavyBanditEnemy extends cc.Component {
         if(state === State.Attack) {
             if(this.attackReady){
                 this.getComponent(cc.Animation).play('attack');
-                cc.audioEngine.playEffect(this.attackAudio, false);
+                // cc.audioEngine.playEffect(this.attackAudio, false);
                 this.attackReady = false;
             }
             else{
@@ -111,5 +111,9 @@ export default class HeavyBanditEnemy extends cc.Component {
                 enemy.collider.getComponent(Info).getDamage += this.damage;
             }
         }
+    }
+
+    playAttackAudio(){ // Animation Event
+        cc.audioEngine.playEffect(this.attackAudio, false);
     }
 }

@@ -65,6 +65,11 @@
   },
   "events": [
     {
+      "frame": 0.5,
+      "func": "playAttackAudio",
+      "params": []
+    },
+    {
       "frame": 0.875,
       "func": "attack",
       "params": []
