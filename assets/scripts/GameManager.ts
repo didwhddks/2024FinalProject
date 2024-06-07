@@ -1,6 +1,8 @@
 declare const firebase: any;
 
 import Info from "./Info";
+import KeyboardManager from "./KeyboardManager";
+import Shake from "./Shake";
 
 const {ccclass, property} = cc._decorator;
 
@@ -29,6 +31,17 @@ export default class GameManager extends cc.Component {
     @property(cc.Node)
     base:cc.Node=null;
 
+    @property(cc.Node)
+    blood:cc.Node=null;
+
+    // add bgm to the scene
+    @property(cc.AudioClip)
+    bgm: cc.AudioClip = null;
+
+    // add waiting bgm to the scene
+    @property(cc.AudioClip)
+    waiting_bgm: cc.AudioClip = null;
+
     user = null;
     roomId = null;
     rivalId = null;
@@ -55,11 +68,15 @@ export default class GameManager extends cc.Component {
     index: number = 0; // 玩家A召喚的 > 0, 玩家B召喚的 < 0
     gameOver: boolean = false;
 
+    blood_exist: boolean = false;
+
     onLoad () {
         this.user = firebase.auth().currentUser;
         cc.director.getPhysicsManager().enabled = true;
         this.base.getComponent(Info).index=100000;
+        this.base.x = 1600;
         this.enemy_base.getComponent(Info).index=-100000;
+        this.enemy_base.x = -640;
         this.alliance_arr.push(this.base);
         this.enemy_arr.push(this.enemy_base);
         // 看碰撞體
@@ -71,8 +88,9 @@ export default class GameManager extends cc.Component {
         //     ;
     }
     listen1() { // 玩家A, 負責計算
+        cc.audioEngine.stopMusic();
+        cc.audioEngine.playMusic(this.bgm, true);
         this.index = 1;
-
         const playerA = firebase.database().ref('Rooms/' + this.roomId + '/' + this.user.uid).on('child_added', snapshot => {
             if(!this.gameStart) return;
             let message = snapshot.val();
@@ -85,12 +103,28 @@ export default class GameManager extends cc.Component {
             if(mode === 'castleHurt'){
                 if(index === 100000){
                     this.scheduleOnce(() => {
-                        this.base.children[0].getComponent(cc.Sprite).fillRange = id / this.base.getComponent(Info).default_life;
+                        const life_percent = id / this.base.getComponent(Info).default_life;
+                        this.base.children[0].getComponent(cc.Sprite).fillRange = life_percent;
+                        if (life_percent < 0.667 && life_percent > 0.333) {
+                            this.base.getComponent(cc.Animation).play('little_fire');
+                        }
+                        else if (life_percent < 0.333) {
+                            this.base.getComponent(cc.Animation).play('big_fire');
+                        }
+                        this.getComponent(Shake).play();
+                        if(!this.blood_exist) this.SoManyBlood()
                     }, ((time+300)-Date.now())/1000)
                 }
                 else{
                     this.scheduleOnce(() => {
-                        this.enemy_base.children[0].getComponent(cc.Sprite).fillRange = id / this.enemy_base.getComponent(Info).default_life;
+                        const life_percent = id / this.enemy_base.getComponent(Info).default_life;
+                        this.enemy_base.children[0].getComponent(cc.Sprite).fillRange = life_percent;
+                        if (life_percent < 0.667 && life_percent > 0.333) {
+                            this.enemy_base.getComponent(cc.Animation).play('little_fire');
+                        }
+                        else if (life_percent < 0.333) {
+                            this.enemy_base.getComponent(cc.Animation).play('big_fire');
+                        }
                     }, ((time+300)-Date.now())/1000)
                 }
             }
@@ -102,6 +136,10 @@ export default class GameManager extends cc.Component {
                         firebase.database().ref('Rooms/' + this.roomId).remove(); // 移除對戰房間
                         firebase.database().ref('Rooms/' + this.roomId + '/' + this.user.uid).off('child_added', playerA);
                         this.gameOver = true;
+                        cc.systemEvent.off(cc.SystemEvent.EventType.KEY_DOWN);
+                        cc.systemEvent.off(cc.SystemEvent.EventType.KEY_UP);
+                        // stop bgm
+                        cc.audioEngine.stopMusic();
                         cc.director.loadScene('Lose');
                     }, ((time+300)-Date.now())/1000)
                 }
@@ -110,6 +148,10 @@ export default class GameManager extends cc.Component {
                         firebase.database().ref('Rooms/' + this.roomId).remove(); // 移除對戰房間
                         firebase.database().ref('Rooms/' + this.roomId + '/' + this.user.uid).off('child_added', playerA);
                         this.gameOver = true;
+                        cc.systemEvent.off(cc.SystemEvent.EventType.KEY_DOWN);
+                        cc.systemEvent.off(cc.SystemEvent.EventType.KEY_UP);
+                        // stop bgm
+                        cc.audioEngine.stopMusic();
                         cc.director.loadScene('win');
                     }, ((time+300)-Date.now())/1000)
                 }
@@ -165,11 +207,14 @@ export default class GameManager extends cc.Component {
             console.debug("listen1:",this.base,this.enemy_base);
             this.gameStart = true;
             cc.find('ColorBlack').active = false;
-            cc.find('btn1').active = true;
-            cc.find('btn4').active = true;
+            cc.find('Canvas/Main Camera/btn1').active = true;
+            cc.find('Canvas/Main Camera/btn4').active = true;
+            this.getComponent(KeyboardManager).enableKeyboard();
         }
     }
     listen2() { // 玩家B, 不負責計算
+        cc.audioEngine.stopMusic();
+        cc.audioEngine.playMusic(this.bgm, true);
         this.index = -1
         this.invincible = true;
         this.alliance_arr[0].getComponent(Info).index=-100000;
@@ -188,12 +233,28 @@ export default class GameManager extends cc.Component {
                 if(index === -100000){
                     this.scheduleOnce(() => {
                         console.debug("CASTLE HURT");
-                        this.base.children[0].getComponent(cc.Sprite).fillRange = id / this.base.getComponent(Info).default_life;
+                        const life_percent = id / this.base.getComponent(Info).default_life;
+                        this.base.children[0].getComponent(cc.Sprite).fillRange = life_percent;
+                        if (life_percent < 0.667 && life_percent > 0.333) {
+                            this.base.getComponent(cc.Animation).play('little_fire');
+                        }
+                        else if (life_percent < 0.333) {
+                            this.base.getComponent(cc.Animation).play('big_fire');
+                        }
+                        if(!this.blood_exist) this.SoManyBlood()
+                        this.getComponent(Shake).play();
                     }, ((time+300)-Date.now())/1000)
                 }
                 else{
                     this.scheduleOnce(() => {
-                        this.enemy_base.children[0].getComponent(cc.Sprite).fillRange = id / this.enemy_base.getComponent(Info).default_life;
+                        const life_percent = id / this.enemy_base.getComponent(Info).default_life;
+                        this.enemy_base.children[0].getComponent(cc.Sprite).fillRange = life_percent;
+                        if (life_percent < 0.667 && life_percent > 0.333) {
+                            this.enemy_base.getComponent(cc.Animation).play('little_fire');
+                        }
+                        else if (life_percent < 0.333) {
+                            this.enemy_base.getComponent(cc.Animation).play('big_fire');
+                        }
                     }, ((time+300)-Date.now())/1000)
                 }
             }
@@ -204,6 +265,8 @@ export default class GameManager extends cc.Component {
                     this.scheduleOnce(() => {
                         firebase.database().ref('Rooms/' + this.roomId + '/' + this.rivalId).off('child_added', playerB);
                         this.gameOver = true;
+                        cc.systemEvent.off(cc.SystemEvent.EventType.KEY_DOWN);
+                        cc.systemEvent.off(cc.SystemEvent.EventType.KEY_UP);
                         cc.director.loadScene('win');
                     }, ((time+300)-Date.now())/1000)
                 }
@@ -211,6 +274,10 @@ export default class GameManager extends cc.Component {
                     this.scheduleOnce(() => {
                         firebase.database().ref('Rooms/' + this.roomId + '/' + this.rivalId).off('child_added', playerB);
                         this.gameOver = true;
+                        cc.systemEvent.off(cc.SystemEvent.EventType.KEY_DOWN);
+                        cc.systemEvent.off(cc.SystemEvent.EventType.KEY_UP);
+                        // stop bgm
+                        cc.audioEngine.stopMusic();
                         cc.director.loadScene('Lose');
                     }, ((time+300)-Date.now())/1000)
                 } 
@@ -271,14 +338,19 @@ export default class GameManager extends cc.Component {
                this.gameStart = true;
                console.debug("listen2:",this.base,this.enemy_base);        
                cc.find('ColorBlack').active = false;
-               cc.find('btn1').active = true;
-               cc.find('btn4').active = true;
+               cc.find('Canvas/Main Camera/btn1').active = true;
+               cc.find('Canvas/Main Camera/btn4').active = true;
+               this.getComponent(KeyboardManager).enableKeyboard();
                firebase.database().ref('Rooms/' + this.roomId + '/' + this.rivalId).off('child_changed', gameStartListener)
             }        
             
         })
     }
     start() { // 裡面都是匹配相關的code
+        // stop bgm
+        cc.audioEngine.stopMusic();
+        // play bgm
+        cc.audioEngine.playMusic(this.waiting_bgm, true);
         firebase.database().ref('WaitingPlayer/').once('value').then(async(snapshot) => { // 匹配ing
             if(snapshot){ 
                 let waitingPlayer = snapshot.val();
@@ -379,6 +451,8 @@ export default class GameManager extends cc.Component {
 
     async cancelBtn(){ // 取消配對
         await firebase.database().ref('WaitingPlayer/' + this.user.uid).remove();
+        // stop bgm
+        cc.audioEngine.stopMusic();
         cc.director.loadScene('Menu');
     }
 
@@ -488,5 +562,12 @@ export default class GameManager extends cc.Component {
         tmp.getComponent(Info).index= index;
 
         this.alliance_arr.push(tmp);
+    }
+
+    SoManyBlood(){
+        this.blood_exist = true;
+        this.blood.opacity = 255;
+        let action = cc.sequence(cc.fadeOut(0.5), cc.callFunc(() => { this.blood_exist = false; }));
+        this.blood.runAction(action);
     }
 }

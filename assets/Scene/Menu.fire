@@ -832,6 +832,9 @@
       "__id__": 17
     },
     "_enabled": true,
+    "bgm": {
+      "__uuid__": "c7299f6c-8d9a-4410-90c9-670395be17b1"
+    },
     "_id": "77r+teaUtG5IAdh/RI3+Zp"
   },
   {
