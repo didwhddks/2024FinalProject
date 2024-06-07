@@ -20,6 +20,8 @@ export default class GameManager extends cc.Component {
     HeavyBanditBtn: cc.Button = null;
     @property(cc.Button)
     KunoichiBtn: cc.Button = null;
+    @property(cc.Button)
+    levelUpBtn: cc.Button = null;
 
     @property(cc.Node)
     enemy_base:cc.Node=null;
@@ -33,7 +35,14 @@ export default class GameManager extends cc.Component {
     rivalName = null;
 
     money: number = 100;
-    moneyUpdateSpeed: number = 1;
+    moneyUpdateSpeed: number = 10;
+
+    costForExp: number = 10;
+
+    level: number = 1;
+    maxLevel: number = 5;
+    currentExp: number = 0;
+    expNeededForEachLevel: [100, 150, 200, 250, 300];
 
     heavyBanditCost: number = 10;
     kunoichiCost: number = 20;
@@ -343,6 +352,7 @@ export default class GameManager extends cc.Component {
         if(this.gameOver){
             this.HeavyBanditBtn.interactable = false;
             this.KunoichiBtn.interactable = false;
+            this.levelUpBtn.interactable = false;
             return;
         }
         else {
@@ -351,6 +361,7 @@ export default class GameManager extends cc.Component {
 
             this.HeavyBanditBtn.interactable = this.money >= this.heavyBanditCost;
             this.KunoichiBtn.interactable = this.money >= this.kunoichiCost;
+            this.levelUpBtn.interactable = this.money >= this.costForExp;
 
             if(!this.invincible){
                 for(let i of this.alliance_arr) {  // 實際打出傷害
@@ -369,6 +380,19 @@ export default class GameManager extends cc.Component {
     async cancelBtn(){ // 取消配對
         await firebase.database().ref('WaitingPlayer/' + this.user.uid).remove();
         cc.director.loadScene('Menu');
+    }
+
+    async clickLevelUpBtn() {
+        if (this.level >= this.maxLevel) return;
+        if (this.money < this.costForExp) return;
+
+        this.money -= this.costForExp;
+        this.currentExp += 20;
+
+        if (this.currentExp >= this.expNeededForEachLevel[this.level - 1]) {
+            this.currentExp -= this.expNeededForEachLevel[this.level - 1];
+            this.level++;
+        }
     }
 
     async clickHeavyBanditBtn() {

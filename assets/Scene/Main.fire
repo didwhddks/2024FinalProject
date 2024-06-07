@@ -386,6 +386,7 @@
     "KunoichiBtn": {
       "__id__": 17
     },
+    "levelUpBtn": null,
     "enemy_base": {
       "__id__": 25
     },
